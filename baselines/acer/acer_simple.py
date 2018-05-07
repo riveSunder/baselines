@@ -95,6 +95,8 @@ class Model(object):
         with tf.variable_scope("", custom_getter=custom_getter, reuse=True):
             print("enter variable scope")
             polyak_model = policy(sess, ob_space, ac_space, nenvs, nsteps + 1, nstack, reuse=True)
+            
+            print("polyak_model set")
 
         # Notation: (var) = batch variable, (var)s = seqeuence variable, (var)_i = variable index by action at step i
         v = tf.reduce_sum(train_model.pi * train_model.q, axis = -1) # shape is [nenvs * (nsteps + 1)]
