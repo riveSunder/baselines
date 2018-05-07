@@ -148,6 +148,7 @@ class Model(object):
         loss = loss_policy + q_coef * loss_q - ent_coef * entropy
 
         if trust_region:
+            print("enter trust region")
             g = tf.gradients(- (loss_policy - ent_coef * entropy) * nsteps * nenvs, f) #[nenvs * nsteps, nact]
             # k = tf.gradients(KL(f_pol || f), f)
             k = - f_pol / (f + eps) #[nenvs * nsteps, nact] # Directly computed gradient of KL divergence wrt f
@@ -334,20 +335,25 @@ def learn(policy, env, seed, nsteps=20, nstack=4, total_timesteps=int(80e6), q_c
                   max_grad_norm=max_grad_norm, lr=lr, rprop_alpha=rprop_alpha, rprop_epsilon=rprop_epsilon,
                   total_timesteps=total_timesteps, lrschedule=lrschedule, c=c,
                   trust_region=trust_region, alpha=alpha, delta=delta)
-
+    print("Model initialized, start runner")
     runner = Runner(env=env, model=model, nsteps=nsteps, nstack=nstack)
+    print("Runner ran")
     if replay_ratio > 0:
         buffer = Buffer(env=env, nsteps=nsteps, nstack=nstack, size=buffer_size)
     else:
         buffer = None
+    print("Buffer set")
     nbatch = nenvs*nsteps
     acer = Acer(runner, model, buffer, log_interval)
+    print("Acer set")
     acer.tstart = time.time()
+    print("Start time = %.2f"%acer.tstart)
     for acer.steps in range(0, total_timesteps, nbatch): #nbatch samples, 1 on_policy call and multiple off-policy calls
+        print("Begin steps")
         acer.call(on_policy=True)
         if replay_ratio > 0 and buffer.has_atleast(replay_start):
             n = np.random.poisson(replay_ratio)
             for _ in range(n):
                 acer.call(on_policy=False)  # no simulation steps in this
-
+    print("Steps finished, ready to close environment")
     env.close()
