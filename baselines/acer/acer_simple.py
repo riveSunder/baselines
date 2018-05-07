@@ -59,10 +59,10 @@ class Model(object):
                  ent_coef, q_coef, gamma, max_grad_norm, lr,
                  rprop_alpha, rprop_epsilon, total_timesteps, lrschedule,
                  c, trust_region, alpha, delta):
-        config = tf.ConfigProto(allow_soft_placement=True,
-                                intra_op_parallelism_threads=num_procs,
-                                inter_op_parallelism_threads=num_procs)
-        sess = tf.Session(config=config)
+        #config = tf.ConfigProto(allow_soft_placement=True,
+        #                       intra_op_parallelism_threads=num_procs,
+        #                        inter_op_parallelism_threads=num_procs)
+        #sess = tf.Session(config=config)
         nact = ac_space.n
         nbatch = nenvs * nsteps
 
