@@ -59,10 +59,10 @@ class Model(object):
                  ent_coef, q_coef, gamma, max_grad_norm, lr,
                  rprop_alpha, rprop_epsilon, total_timesteps, lrschedule,
                  c, trust_region, alpha, delta):
-        #config = tf.ConfigProto(allow_soft_placement=True,
-        #                       intra_op_parallelism_threads=num_procs,
-        #                        inter_op_parallelism_threads=num_procs)
-        #sess = tf.Session(config=config)
+        config = tf.ConfigProto(allow_soft_placement=True,
+                                intra_op_parallelism_threads=num_procs,
+                                inter_op_parallelism_threads=num_procs)
+        sess = tf.Session(config=config)
         nact = ac_space.n
         nbatch = nenvs * nsteps
 
@@ -80,17 +80,22 @@ class Model(object):
         print("Params {}".format(len(params)))
         for var in params:
             print(var)
+        print("finished finding/printing trainable variables")
 
         # create polyak averaged model
         ema = tf.train.ExponentialMovingAverage(alpha)
         ema_apply_op = ema.apply(params)
 
         def custom_getter(getter, *args, **kwargs):
+            
+	    print("custom_getter go")
             v = ema.average(getter(*args, **kwargs))
             print(v.name)
             return v
 
         with tf.variable_scope("", custom_getter=custom_getter, reuse=True):
+            
+	    print("enter variable scope")
             polyak_model = policy(sess, ob_space, ac_space, nenvs, nsteps + 1, nstack, reuse=True)
 
         # Notation: (var) = batch variable, (var)s = seqeuence variable, (var)_i = variable index by action at step i
@@ -323,7 +328,7 @@ def learn(policy, env, seed, nsteps=20, nstack=4, total_timesteps=int(80e6), q_c
     nenvs = env.num_envs
     ob_space = env.observation_space
     ac_space = env.action_space
-    num_procs = 3 # double HACK! #len(env.remotes) # HACK
+    num_procs = len(env.remotes) # HACK
     model = Model(policy=policy, ob_space=ob_space, ac_space=ac_space, nenvs=nenvs, nsteps=nsteps, nstack=nstack,
                   num_procs=num_procs, ent_coef=ent_coef, q_coef=q_coef, gamma=gamma,
                   max_grad_norm=max_grad_norm, lr=lr, rprop_alpha=rprop_alpha, rprop_epsilon=rprop_epsilon,
