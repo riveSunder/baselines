@@ -5,7 +5,7 @@ class AbstractEnvRunner(ABC):
     def __init__(self, *, env, model, nsteps):
         self.env = env
         self.model = model
-        nenv = env.num_envs
+        nenv = 1#env.num_envs
         self.batch_ob_shape = (nenv*nsteps,) + env.observation_space.shape
         self.obs = np.zeros((nenv,) + env.observation_space.shape, dtype=model.train_model.X.dtype.name)
         self.obs[:] = env.reset()
