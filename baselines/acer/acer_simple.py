@@ -87,15 +87,13 @@ class Model(object):
         ema_apply_op = ema.apply(params)
 
         def custom_getter(getter, *args, **kwargs):
-            
-	    print("custom_getter go")
+            print("custom_getter go")
             v = ema.average(getter(*args, **kwargs))
             print(v.name)
             return v
 
         with tf.variable_scope("", custom_getter=custom_getter, reuse=True):
-            
-	    print("enter variable scope")
+            print("enter variable scope")
             polyak_model = policy(sess, ob_space, ac_space, nenvs, nsteps + 1, nstack, reuse=True)
 
         # Notation: (var) = batch variable, (var)s = seqeuence variable, (var)_i = variable index by action at step i
