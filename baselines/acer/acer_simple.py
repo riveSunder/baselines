@@ -326,7 +326,7 @@ def learn(policy, env, seed, nsteps=20, nstack=4, total_timesteps=int(80e6), q_c
     tf.reset_default_graph()
     set_global_seeds(seed)
 
-    nenvs = env.num_envs
+    nenvs = 1 # env.num_envs
     ob_space = env.observation_space
     ac_space = env.action_space
     num_procs = 1 #DOUBLE HACK #len(env.remotes) # HACK
